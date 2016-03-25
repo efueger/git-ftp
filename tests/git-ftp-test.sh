@@ -596,6 +596,23 @@ test_include_similar() {
 	assertTrue 'templates/foo.html was not uploaded' "remote_file_exists 'templates/foo.html'"
 }
 
+# resolves issue #245
+test_include_syncroot() {
+	syncroot="dist"
+	targetfile="main.css"
+	target="$syncroot/$targetfile"
+	source="main.scss"
+	touch "$source"
+	mkdir "$syncroot"
+	touch "$target"
+	echo "$syncroot" > ".gitignore"
+	echo "$target:/$source" > ".git-ftp-include"
+	git add . > /dev/null
+	git commit -a -m "test uploading only dist files" -q
+	init=$($GIT_FTP init --syncroot "$syncroot")
+	assertTrue "remote file '$targetfile'" "remote_file_exists '$targetfile'"
+}
+
 test_hidden_file_only() {
 	cd $GIT_PROJECT_PATH
 	echo "test" > .htaccess
